@@ -5,7 +5,7 @@
 
 #define FIREBASE_HOST "nekoneko-70dce.firebaseio.com"
 #define FIREBASE_AUTH "AIzaSyAM_YD8EM7TXpkFOuEn5wXj0Ifwsy_ZEVQ"
-#define WIFI_SSID "SSID"
+#define WIFI_SSID "inno-park"
 #define WIFI_PASSWORD "PASSWORD"
 
 //서보모터 핀 설정하기
