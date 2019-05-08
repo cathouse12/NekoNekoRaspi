@@ -2,6 +2,7 @@
 #include <SimpleTimer.h>
 #include <ESP8266WiFi.h>
 #include <FirebaseArduino.h>
+#include <ArduinoJson.h>
 
 #define FIREBASE_HOST "nekoneko-70dce.firebaseio.com"
 #define FIREBASE_AUTH "AIzaSyAM_YD8EM7TXpkFOuEn5wXj0Ifwsy_ZEVQ"
@@ -46,8 +47,10 @@ void setup() {
    * 10분 마다 서버 정보 업데이트 */
   timer.setInterval(1000,sendToFirebase);
 
-
+  //와이파이 연결하기
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+
+  //와이파이 상태 표시하기
   Serial.print("connecting");
   while (WiFi.status() != WL_CONNECTED) {
     Serial.print(".");
@@ -56,7 +59,8 @@ void setup() {
   Serial.println();
   Serial.print("connected: ");
   Serial.println(WiFi.localIP());
-  
+
+  //데이터베이스 설정하기
   Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
 }
 
@@ -87,20 +91,31 @@ void sendToFirebase(){
   //초음파 받기 까지의 시간 구하기
   unsigned long duration = pulseIn(echoPin,HIGH);
     
-  //거리 계산하기리
+  //거리 계산하기
   float distance = ((float)(340 * duration)/10000)/2;
-
 
   //시리얼에 출력하기
   Serial.println(distance);
-  Firebase.setFloat("distance");
-  Serial.println("OH!!");
 
+  //StaticJsonBuffer 객체 선언하기
+  StaticJsonBuffer<200> jsonBuffer;
 
+  //JsonObject 선언하기
+  JsonObject& root = jsonBuffer.createObject;
+  root["longitude"] = 123.0;
+  root["latitude"] = 36.3;
+  root["isCatChecked"] = true;
+  root["feedQuantity"] = 98;
+
+  //데이터 올리기
+  Firebase.setFloat("neko",root);
+
+  //업데이트 실패할 경우
   if (Firebase.failed()) {
-      Serial.print("failed");
+      Serial.print("failed: ");
       Serial.println(Firebase.error());  
       return;
   }
-  delay(1000);
+
+  Serial.println("OH!!");
 }
