@@ -1,5 +1,12 @@
 #include <Servo.h>
 #include <SimpleTimer.h>
+#include <ESP8266WiFi.h>
+#include <FirebaseArduino.h>
+
+#define FIREBASE_HOST "nekoneko-70dce.firebaseio.com"
+#define FIREBASE_AUTH "AIzaSyAM_YD8EM7TXpkFOuEn5wXj0Ifwsy_ZEVQ"
+#define WIFI_SSID "SSID"
+#define WIFI_PASSWORD "PASSWORD"
 
 //서보모터 핀 설정하기
 int feedServoPin1 = 4;
@@ -38,7 +45,21 @@ void setup() {
    * 600000 -> 10분
    * 10분 마다 서버 정보 업데이트 */
   timer.setInterval(1000,sendToFirebase);
+
+
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  Serial.print("connecting");
+  while (WiFi.status() != WL_CONNECTED) {
+    Serial.print(".");
+    delay(500);
+  }
+  Serial.println();
+  Serial.print("connected: ");
+  Serial.println(WiFi.localIP());
+  
+  Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
 }
+
 
 void loop() {
   // 첫번째 서보모터 돌리기
@@ -69,8 +90,17 @@ void sendToFirebase(){
   //거리 계산하기리
   float distance = ((float)(340 * duration)/10000)/2;
 
+
   //시리얼에 출력하기
   Serial.println(distance);
-  
+  Firebase.setFloat("distance");
   Serial.println("OH!!");
+
+
+  if (Firebase.failed()) {
+      Serial.print("failed");
+      Serial.println(Firebase.error());  
+      return;
+  }
+  delay(1000);
 }
